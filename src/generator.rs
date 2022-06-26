@@ -4,6 +4,7 @@ use fantoccini::{Client, ClientBuilder, Locator};
 use colored::Colorize;
 use std::time::Duration;
 use rusqlite::params;
+use chrono::{DateTime, FixedOffset};
 
 use crate::get_db;
 
@@ -11,7 +12,7 @@ use crate::get_db;
 pub struct Chapter {
 	pub title: String,
 	pub url: String,
-	pub date: Option<String>,
+	pub date: Option<DateTime<FixedOffset>>,
 }
 
 #[derive(Debug)]
@@ -91,8 +92,8 @@ async fn start_crawlers(instructions: Vec<Instruction>) -> Result<()> {
 										&chapter.title,
 										&chapter.url,
 										&chapter.date,
-										chrono::offset::Local::now().format("%Y-%m-%d %H:%M:%S.%3f %:z").to_string(),
-										chrono::offset::Local::now().format("%Y-%m-%d %H:%M:%S.%3f %:z").to_string(),
+										chrono::offset::Local::now(),
+										chrono::offset::Local::now(),
 									],
 								).expect("failed inserting data");
 							}
@@ -145,12 +146,18 @@ async fn get_chapters(client: &Client, instruction: &Instruction) -> Result<Vec<
 
 		let url = chapter.get("url").ok_or(anyhow!("failed getting url from chapter"))?;
 		let url = url.as_str().ok_or(anyhow!("failed converting chapter url to string"))?;
+		
+		let date = match chapter.get("date") {
+			Some(date) => date.as_str().ok_or(anyhow!("failed converting chapter date to string"))?,
+			None => "",
+		};
 
 		let ch = Chapter {
 			title: String::from(title),
 			url: String::from(url),
-			date: None,
+			date: if date.len() > 0 { Some(date.parse().unwrap()) } else { None },
 		};
+		println!("{:?}", ch);
 		chapters.push(ch);
 	}
 
