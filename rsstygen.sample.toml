@@ -1,0 +1,37 @@
+[Bokuyaba]
+url = "https://mangacross.jp/comics/yabai"
+list_node = "li.episode-list__item"
+js_script = """
+let chapters = [];
+let listNode = document.querySelectorAll(`li.episode-list__item`);
+for (let chapterNode of listNode) {
+	let linkNode = chapterNode.querySelector(`a`);
+	let titleNode = chapterNode.querySelector(`div.episode-list__number`);
+	if (linkNode != null && titleNode != null) {
+		chapters.push({
+			url: linkNode.href.trim(),
+			title: titleNode.innerText.trim(),
+		});
+	}
+}
+
+return chapters;"""
+
+[Negasuki]
+url = "https://mangacross.jp/comics/negasuki"
+list_node = "li.episode-list__item"
+js_script = """
+let chapters = [];
+let listNode = document.querySelectorAll(`li.episode-list__item`);
+for (let chapterNode of listNode) {
+	let linkNode = chapterNode.querySelector(`a`);
+	let titleNode = chapterNode.querySelector(`div.episode-list__number`);
+	if (linkNode != null && titleNode != null) {
+		chapters.push({
+			url: linkNode.href.trim(),
+			title: titleNode.innerText.trim(),
+		});
+	}
+}
+
+return chapters;"""
