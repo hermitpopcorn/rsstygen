@@ -4,15 +4,18 @@ use fantoccini::{Client, ClientBuilder, Locator};
 use colored::Colorize;
 use std::time::Duration;
 use rusqlite::params;
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, FixedOffset, Local};
 
 use crate::get_db;
 
 #[derive(Debug)]
 pub struct Chapter {
+	pub id: Option<usize>,
 	pub title: String,
 	pub url: String,
 	pub date: Option<DateTime<FixedOffset>>,
+	pub created_at: Option<DateTime<Local>>,
+	pub updated_at: Option<DateTime<Local>>,
 }
 
 #[derive(Debug)]
@@ -25,6 +28,8 @@ pub struct Instruction {
 
 pub async fn generator(instructions: Vec<Instruction>) -> Result<()> {
 	start_crawlers(instructions).await?;
+
+	write_rss_from_db().await?;
 	
 	Ok(())
 }
@@ -86,14 +91,14 @@ async fn start_crawlers(instructions: Vec<Instruction>) -> Result<()> {
 							if !row_exists {
 								println!("{} Inserting {} {} into database...", "[GENR]".green(), &instruction.title.cyan(), &chapter.title.magenta());
 								c.execute(
-									"INSERT INTO Chapters (manga, title, url, date, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)",
+									"INSERT INTO Chapters (manga, title, url, date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
 									params![
 										&instruction.title,
 										&chapter.title,
 										&chapter.url,
 										&chapter.date,
-										chrono::offset::Local::now(),
-										chrono::offset::Local::now(),
+										&chapter.created_at,
+										&chapter.updated_at,
 									],
 								).expect("failed inserting data");
 							}
@@ -152,14 +157,22 @@ async fn get_chapters(client: &Client, instruction: &Instruction) -> Result<Vec<
 			None => "",
 		};
 
+		let now = chrono::offset::Local::now();
+
 		let ch = Chapter {
+			id: None,
 			title: String::from(title),
 			url: String::from(url),
 			date: if date.len() > 0 { Some(date.parse().unwrap()) } else { None },
+			created_at: Some(now),
+			updated_at: Some(now),
 		};
-		println!("{:?}", ch);
 		chapters.push(ch);
 	}
 
 	Ok(chapters)
+}
+
+async fn write_rss_from_db() -> Result<()> {
+	Ok(())
 }

@@ -93,13 +93,13 @@ fn get_db() -> Result<Connection> {
 
 fn prep_db_table(connection: &Connection) -> Result<()> {
 	match connection.execute(r#"CREATE TABLE IF NOT EXISTS "Chapters" (
-		"id"	INTEGER,
-		"manga"	VARCHAR(255) NOT NULL,
-		"title"	VARCHAR(255) NOT NULL,
-		"url"	VARCHAR(255) NOT NULL,
-		"date"	DATETIME,
-		"createdAt"	DATETIME NOT NULL,
-		"updatedAt"	DATETIME NOT NULL,
+		"id"			INTEGER,
+		"manga"			VARCHAR(255) NOT NULL,
+		"title"			VARCHAR(255) NOT NULL,
+		"url"			VARCHAR(255) NOT NULL,
+		"date"			DATETIME,
+		"created_at"	DATETIME NOT NULL,
+		"updated_at"	DATETIME NOT NULL,
 		PRIMARY KEY("id" AUTOINCREMENT)
 	)"#, []) {
 		Ok(_) => Ok(()),

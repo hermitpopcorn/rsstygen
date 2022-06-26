@@ -4,7 +4,8 @@ list_node = "li.episode-list__item"
 js_script = """
 let chapters = [];
 let listNode = document.querySelectorAll(`li.episode-list__item`);
-for (let chapterNode of listNode) {
+for (let i = listNode.length - 1; i >= 0; i--) {
+	let chapterNode = listNode[i];
 	let linkNode = chapterNode.querySelector(`a`);
 	let titleNode = chapterNode.querySelector(`div.episode-list__number`);
 	if (linkNode != null && titleNode != null) {
@@ -23,7 +24,8 @@ list_node = "li.episode-list__item"
 js_script = """
 let chapters = [];
 let listNode = document.querySelectorAll(`li.episode-list__item`);
-for (let chapterNode of listNode) {
+for (let i = listNode.length - 1; i >= 0; i--) {
+	let chapterNode = listNode[i];
 	let linkNode = chapterNode.querySelector(`a`);
 	let titleNode = chapterNode.querySelector(`div.episode-list__number`);
 	if (linkNode != null && titleNode != null) {
