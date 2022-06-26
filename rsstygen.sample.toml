@@ -37,3 +37,30 @@ for (let i = listNode.length - 1; i >= 0; i--) {
 }
 
 return chapters;"""
+
+[Yangaru]
+url = "https://mangahack.com/comics/7612"
+list_node = "div.comicList_box.cf"
+js_script = """
+function parseDate(dateString) {
+	const split = dateString.split('.');
+	return new Date(`${split[0]}-${split[1]}-${split[2]}T10:00:00+09:00`);
+};
+
+let chapters = [];
+let listNode = document.querySelectorAll(`div.comicList_box.cf`);
+for (let i = listNode.length - 1; i >= 0; i--) {
+	let chapterNode = listNode[i];
+	let linkNode = chapterNode.querySelector(`a`);
+	let titleNode = chapterNode.querySelector(`p.title span a`);
+	let dateNode = chapterNode.querySelector(`div.right ul.cf li`);
+	if (linkNode != null) {
+		chapters.push({
+			url: linkNode.href.trim(),
+			title: titleNode.innerText.trim(),
+			date: parseDate(dateNode.innerText.trim()),
+		});
+	}
+}
+
+return chapters;"""
