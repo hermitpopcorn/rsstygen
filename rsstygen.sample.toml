@@ -1,3 +1,10 @@
+[ftp]
+host = "ftp.net"
+port = 21
+username = "username"
+password = "password"
+target_path = "/htdocs/rss/"
+
 [Bokuyaba]
 url = "https://mangacross.jp/comics/yabai"
 list_node = "li.episode-list__item"

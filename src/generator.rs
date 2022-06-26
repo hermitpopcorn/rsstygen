@@ -30,7 +30,7 @@ pub struct Instruction {
 	pub js_script: String,
 }
 
-pub async fn generator(instructions: Vec<Instruction>) -> Result<()> {
+pub async fn generate(instructions: Vec<Instruction>) -> Result<()> {
 	// Create map of titles before giving it to crawlers
 	let titles: HashMap<String, String> = instructions.iter().map(|i| (i.title.to_owned(), i.url.to_owned())).collect();
 

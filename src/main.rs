@@ -5,13 +5,17 @@ use rusqlite::Connection;
 use std::time::Duration;
 
 mod generator;
-use crate::generator::{generator, Instruction};
+use crate::generator::{generate, Instruction};
+
+mod uploader;
+use crate::uploader::{upload, FtpSettings};
 
 #[tokio::main]
 async fn main() {
 	// Read config file
 	println!("{} Reading config file...", "[MAIN]".blue());
 	let mut manga = vec![];
+	let mut ftp_settings: Option<FtpSettings> = None;
 	{
 		let config = match get_config() {
 			Ok(c) => c,
@@ -21,16 +25,28 @@ async fn main() {
 			},
 		};
 
-		for (title, instructions) in config.as_table().unwrap() {
-			println!("{} Found config for: {}", "[MAIN]".blue(), &title.cyan());
-			let instructions = instructions.as_table().unwrap();
-			let instruction = Instruction {
-				title: String::from(title),
-				url: String::from(instructions.get("url").unwrap().as_str().unwrap_or("")),
-				list_node: String::from(instructions.get("list_node").unwrap().as_str().unwrap_or("")),
-				js_script: String::from(instructions.get("js_script").unwrap().as_str().unwrap_or("")),
-			};
-			manga.push(instruction);
+		for (head, table) in config.as_table().unwrap() {
+			if head.eq("ftp") {
+				println!("{} Found {}.", "[MAIN]".blue(), "FTP configuration".cyan());
+				let settings = table.as_table().unwrap();
+				ftp_settings = Some(FtpSettings {
+					host: String::from(settings.get("host").unwrap().as_str().unwrap_or("")),
+					port: settings.get("port").unwrap().as_integer().unwrap_or(21) as u16,
+					username: String::from(settings.get("username").unwrap().as_str().unwrap_or("")),
+					password: String::from(settings.get("password").unwrap().as_str().unwrap_or("")),
+					target_path: String::from(settings.get("target_path").unwrap().as_str().unwrap_or("")),
+				});
+			} else {
+				println!("{} Found config for: {}", "[MAIN]".blue(), &head.cyan());
+				let instructions = table.as_table().unwrap();
+				let instruction = Instruction {
+					title: String::from(head),
+					url: String::from(instructions.get("url").unwrap().as_str().unwrap_or("")),
+					list_node: String::from(instructions.get("list_node").unwrap().as_str().unwrap_or("")),
+					js_script: String::from(instructions.get("js_script").unwrap().as_str().unwrap_or("")),
+				};
+				manga.push(instruction);
+			}
 		}
 	}
 
@@ -54,9 +70,21 @@ async fn main() {
 
 	// Generate
 	println!("{} Starting generator...", "[MAIN]".blue());
-	match generator(manga).await {
+	match generate(manga).await {
 		Ok(()) => println!("{} {} finished.", "[MAIN]".blue(), "Generator".green()),
 		Err(e) => println!("{} {} {}. ({})", "[MAIN]".blue(), "Generator".green(), "crashed".red(), e),
+	}
+
+	// Upload
+	match ftp_settings {
+		None => {},
+		Some(ftp_settings) => {
+			println!("{} Starting uploader...", "[MAIN]".blue());
+			match upload(ftp_settings) {
+				Ok(()) => println!("{} {} finished.", "[MAIN]".blue(), "Uploader".yellow()),
+				Err(e) => println!("{} {} {}. ({})", "[MAIN]".blue(), "Uploader".yellow(), "crashed".red(), e),
+			}
+		}
 	}
 
 	// Saraba
