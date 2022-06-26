@@ -1,8 +1,8 @@
 use colored::Colorize;
-use std::env;
-use std::fs;
+use std::{env, fs};
 use anyhow::{Result, anyhow};
 use rusqlite::Connection;
+use std::time::Duration;
 
 mod generator;
 use crate::generator::{generator, Instruction};
@@ -61,6 +61,7 @@ async fn main() {
 
 	// Saraba
 	println!("{} All done. Goodbye!", "[MAIN]".blue());
+	std::thread::sleep(Duration::from_secs(2));
 }
 
 fn get_config() -> Result<toml::value::Value> {
